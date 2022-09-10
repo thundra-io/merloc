@@ -66,9 +66,13 @@ function convertData(data: any): any {
 }
 
 export async function postToConnection(event: APIGatewayEvent, data: any, connectionId: string) {
+    // We are not using `event.requestContext.domainName` here,
+    // because in case of custom domain usage,
+    // we should not use custom domain name but API GW endpoint URL.
+    const apiDomainName: string = `${event.requestContext.apiId}.execute-api.${process.env.AWS_REGION}.amazonaws.com`;
     const apigwManagementApi = new ApiGatewayManagementApiClient({
         apiVersion: '2018-11-29',
-        endpoint: `https://${event.requestContext.domainName}/${event.requestContext.stage}`,
+        endpoint: `https://${apiDomainName}/${event.requestContext.stage}`,
     });
     try {
         const input = {

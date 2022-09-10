@@ -1,11 +1,14 @@
 import * as cdk from '@aws-cdk/core';
+import { Duration } from '@aws-cdk/core';
+import * as acm from '@aws-cdk/aws-certificatemanager';
 import * as apigwv2 from '@aws-cdk/aws-apigatewayv2';
 import { WebSocketLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations';
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
-import { NodejsFunction } from '@aws-cdk/aws-lambda-nodejs';
-import { Runtime } from '@aws-cdk/aws-lambda';
-import { Duration } from '@aws-cdk/core';
 import { Effect, PolicyStatement } from '@aws-cdk/aws-iam';
+import { Runtime } from '@aws-cdk/aws-lambda';
+import { NodejsFunction } from '@aws-cdk/aws-lambda-nodejs';
+import * as route53 from '@aws-cdk/aws-route53';
+import * as route53Target from '@aws-cdk/aws-route53-targets';
 
 const DEFAULT_DEBUG_ENABLE = 'true';
 const DEFAULT_BROKER_CONNECTION_HANDLER_FUNCTION_MEMORY_SIZE: string = '1024';
@@ -13,6 +16,7 @@ const DEFAULT_BROKER_CONNECTION_HANDLER_FUNCTION_TIMEOUT: string = '30';
 const DEFAULT_BROKER_MESSAGE_HANDLER_FUNCTION_MEMORY_SIZE: string = '1024';
 const DEFAULT_BROKER_MESSAGE_HANDLER_FUNCTION_TIMEOUT: string = '30';
 const DEFAULT_BROKER_WS_API_STAGE_NAME = 'dev';
+const DEFAULT_BROKER_WS_API_SUBDOMAIN_NAME = 'merloc';
 
 export class BrokerStack extends cdk.Stack {
 
@@ -21,6 +25,9 @@ export class BrokerStack extends cdk.Stack {
   private readonly clientGatekeeperConnectionPairsTable: dynamodb.Table;
   private readonly brokerConnectionHandlerFunction: NodejsFunction;
   private readonly brokerMessageHandlerFunction: NodejsFunction;
+  private readonly brokerWebSocketAPICertificate: acm.DnsValidatedCertificate;
+  private readonly brokerWebSocketAPIDomainName: apigwv2.DomainName;
+  private readonly brokerWebSocketAPIDNSRecord: route53.ARecord;
   private readonly brokerWebSocketAPI: apigwv2.WebSocketApi;
   private readonly brokerWebSocketAPIStage: apigwv2.WebSocketStage;
 
@@ -38,11 +45,11 @@ export class BrokerStack extends cdk.Stack {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
-    new cdk.CfnOutput(this, `merloc-client-connections-table-name`, {
+    new cdk.CfnOutput(this, `merloc-client-connections-table-name-output`, {
       value: this.clientConnectionsTable.tableName,
       exportName: `merloc-client-connections-table-name`,
     });
-    new cdk.CfnOutput(this, `merloc-client-connections-table-arn`, {
+    new cdk.CfnOutput(this, `merloc-client-connections-table-arn-output`, {
       value: this.clientConnectionsTable.tableArn,
       exportName: `merloc-client-connections-table-arn`,
     });
@@ -58,11 +65,11 @@ export class BrokerStack extends cdk.Stack {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
-    new cdk.CfnOutput(this, `merloc-gatekeeper-connections-table-name`, {
+    new cdk.CfnOutput(this, `merloc-gatekeeper-connections-table-name-output`, {
       value: this.gatekeeperConnectionsTable.tableName,
       exportName: `merloc-gatekeeper-connections-table-name`,
     });
-    new cdk.CfnOutput(this, `merloc-gatekeeper-connections-table-arn`, {
+    new cdk.CfnOutput(this, `merloc-gatekeeper-connections-table-arn-output`, {
       value: this.gatekeeperConnectionsTable.tableArn,
       exportName: `merloc-gatekeeper-connections-table-arn`,
     });
@@ -82,11 +89,11 @@ export class BrokerStack extends cdk.Stack {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
-    new cdk.CfnOutput(this, `merloc-client-gatekeeper-connection-pairs-table-name`, {
+    new cdk.CfnOutput(this, `merloc-client-gatekeeper-connection-pairs-table-name-output`, {
       value: this.clientGatekeeperConnectionPairsTable.tableName,
       exportName: `merloc-client-gatekeeper-connection-pairs-table-name`,
     });
-    new cdk.CfnOutput(this, `merloc-client-gatekeeper-connection-pairs-table-arn`, {
+    new cdk.CfnOutput(this, `merloc-client-gatekeeper-connection-pairs-table-arn-output`, {
       value: this.clientGatekeeperConnectionPairsTable.tableArn,
       exportName: `merloc-client-gatekeeper-connection-pairs-table-arn`,
     });
@@ -189,34 +196,83 @@ export class BrokerStack extends cdk.Stack {
       },
       routeSelectionExpression: '$request.body.type',
     });
-    new cdk.CfnOutput(this, `merloc-broker-ws-api-name`, {
+    new cdk.CfnOutput(this, `merloc-broker-ws-api-name-output`, {
       value: this.brokerWebSocketAPI.webSocketApiName || '',
       exportName: `merloc-broker-ws-api-name`,
     });
-    new cdk.CfnOutput(this, `merloc-broker-ws-api-id`, {
+    new cdk.CfnOutput(this, `merloc-broker-ws-api-id-output`, {
       value: this.brokerWebSocketAPI.apiId,
       exportName: `merloc-broker-ws-api-id`,
     });
-    new cdk.CfnOutput(this, `merloc-broker-ws-api-endpoint`, {
+    new cdk.CfnOutput(this, `merloc-broker-ws-api-endpoint-output`, {
       value: this.brokerWebSocketAPI.apiEndpoint,
       exportName: `merloc-broker-ws-api-endpoint`,
     });
+
+    // Check whether custom domain name is specified
+    if (process.env.MERLOC_DOMAIN_NAME) {
+      const brokerWebSocketAPISubDomainName: string =
+          process.env.MERLOC_BROKER_WS_API_SUBDOMAIN_NAME || DEFAULT_BROKER_WS_API_SUBDOMAIN_NAME;
+      const brokerWebSocketAPIFullDomainName: string =
+          `${brokerWebSocketAPISubDomainName}.${process.env.MERLOC_DOMAIN_NAME}`;
+
+      const zone: route53.IHostedZone = route53.HostedZone.fromLookup(this, `merloc-zone`, {
+        domainName: `${process.env.MERLOC_DOMAIN_NAME}`
+      });
+
+      // Create broker websocket API certificate
+      this.brokerWebSocketAPICertificate = new acm.DnsValidatedCertificate(this, `merloc-broker-ws-api-certificate`, {
+        domainName: `${brokerWebSocketAPIFullDomainName}`,
+        subjectAlternativeNames: [`*.${brokerWebSocketAPIFullDomainName}`],
+        hostedZone: zone,
+      });
+      new cdk.CfnOutput(this, `merloc-broker-ws-api-certificate-arn-output`, {
+        value: this.brokerWebSocketAPICertificate.certificateArn,
+        exportName: `merloc-broker-ws-api-certificate-arn`,
+      });
+
+      // Create broker websocket API custom domain name
+      this.brokerWebSocketAPIDomainName = new apigwv2.DomainName(this, `merloc-broker-ws-api-domain-name`, {
+        domainName: brokerWebSocketAPIFullDomainName,
+        certificate: this.brokerWebSocketAPICertificate,
+      });
+      new cdk.CfnOutput(this, `merloc-broker-ws-api-domain-name-output`, {
+        value: this.brokerWebSocketAPIDomainName.name,
+        exportName: `merloc-broker-ws-api-domain-name`,
+      });
+
+      // Create DNS record which points to broker websocket API custom domain name
+      this.brokerWebSocketAPIDNSRecord = new route53.ARecord(this, `merloc-broker-ws-api-dns-record`, {
+        zone: zone,
+        recordName: brokerWebSocketAPISubDomainName,
+        target: route53.RecordTarget.fromAlias(
+            new route53Target.ApiGatewayv2DomainProperties(
+                this.brokerWebSocketAPIDomainName.regionalDomainName,
+                this.brokerWebSocketAPIDomainName.regionalHostedZoneId)),
+      });
+    }
 
     // Create broker websocket API stage
     this.brokerWebSocketAPIStage = new apigwv2.WebSocketStage(this, 'merloc-broker-ws-api-stage', {
       webSocketApi: this.brokerWebSocketAPI,
       stageName: process.env.MERLOC_BROKER_WS_API_STAGE_NAME || DEFAULT_BROKER_WS_API_STAGE_NAME,
       autoDeploy: true,
+      domainMapping:
+          this.brokerWebSocketAPIDomainName
+          ? {
+              domainName: this.brokerWebSocketAPIDomainName,
+          }
+          : undefined,
     });
-    new cdk.CfnOutput(this, `merloc-broker-ws-api-stage-name`, {
+    new cdk.CfnOutput(this, `merloc-broker-ws-api-stage-name-output`, {
       value: this.brokerWebSocketAPIStage.stageName,
       exportName: `merloc-broker-ws-api-stage-name`,
     });
-    new cdk.CfnOutput(this, `merloc-broker-ws-api-stage-url`, {
+    new cdk.CfnOutput(this, `merloc-broker-ws-api-stage-url-output`, {
       value: this.brokerWebSocketAPIStage.url,
       exportName: `merloc-broker-ws-api-stage-url`,
     });
-    new cdk.CfnOutput(this, `merloc-broker-ws-api-stage-callback-url`, {
+    new cdk.CfnOutput(this, `merloc-broker-ws-api-stage-callback-url-output`, {
       value: this.brokerWebSocketAPIStage.callbackUrl,
       exportName: `merloc-broker-ws-api-stage-callback-url`,
     });
@@ -227,7 +283,10 @@ export class BrokerStack extends cdk.Stack {
       resources: [
         `arn:aws:execute-api:${this.region}:${this.account}:${this.brokerWebSocketAPI.apiId}/${this.brokerWebSocketAPIStage.stageName}/*`,
       ],
-      actions: ['execute-api:ManageConnections'],
+      actions: [
+          'execute-api:ManageConnections',
+          'execute-api:Invoke',
+      ],
     });
 
     // Give access to broker connection and message handler functions for broker API management
