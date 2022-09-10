@@ -60,7 +60,7 @@ For example to deploy the broker into us-west-2 region:
 AWS_REGION=us-west-2 ./deploy.sh
 ```
 
-- Note the broker url. Because we will use this url later to configure the MerLoc AWS Lambda runtime and the MerLoc GateKeeper.
+- Note the broker URL. Because we will use this url later to configure the MerLoc AWS Lambda runtime and the MerLoc GateKeeper.
 
 Either you can get it from the AWS CDK outputs, for ex:
 ![Broker URL From AWS CDK Output](./assets/broker-url-from-aws-cdk-output.png)
@@ -84,6 +84,16 @@ You can check the following links for runtime specific setup for supported runti
 There are default configurations for the broker in the `merloc-broker/stack/.env` file.
 To change the broker configurations, you can update the values in the `.env` file here 
 and re-deploy the stack by running `deploy.sh`.
+
+### Custom Domain Name
+
+If you want to use custom domain name for your broker URL configuration (instead of the generated AWS API Gateway endpoint URL), you need to create an **AWS Hosted Zone** and configure the following properties in the `merloc-broker/stack/.env` file according to the **Hosted Zone**:
+- `MERLOC_DOMAIN_NAME`: Specifies the root domain name to be used by MerLoc. **Domain name** of the target **AWS Hosted Zone** is expected to be set here. This configuration is **mandatory** if you want to use custom domain name.
+- `MERLOC_BROKER_WS_API_SUBDOMAIN_NAME`: Specifies the sub-domain name to be used by MerLoc **broker**. This configuration is **optional** and default value is `merloc`.
+
+After configuring those settings, your full custom domain name will be `${MERLOC_BROKER_WS_API_SUBDOMAIN_NAME}.${MERLOC_DOMAIN_NAME}` and you will be able to use `wss://${MERLOC_BROKER_WS_API_SUBDOMAIN_NAME}.${MERLOC_DOMAIN_NAME}` custom domain name as your broker URL configuration instead of the generated AWS API Gateway endpoint URL.
+
+So let's say that you have an AWS hosted zone with domain name `lambda.dev`. Then you set `MERLOC_DOMAIN_NAME` to `lambda.dev` and set `MERLOC_BROKER_WS_API_SUBDOMAIN_NAME` to `merloc`. So your full custom domain name will be `merloc.lambda.dev` and you can use `wss://merloc.lambda.dev` as your broker URL configuration.
 
 ## Contributing
 
