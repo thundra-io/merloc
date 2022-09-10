@@ -21,12 +21,15 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
+    "@aws-cdk/aws-certificatemanager": "1.166.1",
     "@aws-cdk/aws-apigatewayv2": "1.166.1",
     "@aws-cdk/aws-apigatewayv2-integrations": "1.166.1",
     "@aws-cdk/aws-dynamodb": "1.166.1",
     "@aws-cdk/aws-iam": "1.166.1",
     "@aws-cdk/aws-lambda": "1.166.1",
     "@aws-cdk/aws-lambda-nodejs": "1.166.1",
+    "@aws-cdk/aws-route53": "1.166.1",
+    "@aws-cdk/aws-route53-targets": "1.166.1",
     "@aws-cdk/aws-s3": "1.166.1",
     "@aws-cdk/core": "1.166.1",
     "dotenv": "^16.0.1",
