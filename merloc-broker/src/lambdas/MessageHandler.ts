@@ -15,12 +15,13 @@ import {
 import {
     CLIENT_CONNECTION_TYPE,
     BROKER_ERROR_MESSAGE_TYPE,
-    DEFAULT_CLIENT_CONNECTION_NAME,
     GATEKEEPER_CONNECTION_EXPIRE_TIME_IN_SECONDS,
     CLIENT_GATEKEEPER_CONNECTION_PAIR_EXPIRE_TIME_IN_SECONDS,
+    getDefaultConnectionName,
     generateLambdaProxyResponse,
     postToConnection,
-    buildBrokerEnvelope, getCurrentTimeInSeconds,
+    buildBrokerEnvelope,
+    getCurrentTimeInSeconds,
 } from './Utils';
 import { BrokerEnvelope } from './BrokerEnvelope';
 
@@ -109,7 +110,7 @@ async function forwardToClient(event: APIGatewayEvent, envelop: BrokerEnvelope,
         if (!clientConnectionId) {
             debug(`No client connection could be found with name ${connectionName}`);
             debug(`Checking default client connection ...`);
-            clientConnectionId = await findAssociatedClientConnectionId(DEFAULT_CLIENT_CONNECTION_NAME);
+            clientConnectionId = await findAssociatedClientConnectionId(getDefaultConnectionName(connectionName));
             if (!clientConnectionId) {
                 debug(`No default client connection could be found`);
                 const brokerEnvelope: BrokerEnvelope =

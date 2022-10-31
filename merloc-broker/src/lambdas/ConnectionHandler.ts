@@ -19,18 +19,20 @@ import {
     CONNECT_EVENT_TYPE,
     DISCONNECT_EVENT_TYPE,
     CONNECTION_NAME_HEADER_NAME,
-    CLIENT_CONNECTION_NAME_PREFIX,
     CLIENT_CONNECTION_TYPE,
     GATEKEEPER_CONNECTION_TYPE,
     CLIENT_DISCONNECT_MESSAGE_TYPE,
     CLIENT_CONNECTION_OVERRIDE_MESSAGE_TYPE,
-    GATEKEEPER_CONNECTION_NAME_PREFIX,
     CLIENT_CONNECTION_EXPIRE_TIME_IN_SECONDS,
     GATEKEEPER_CONNECTION_EXPIRE_TIME_IN_SECONDS,
     getCurrentTimeInSeconds,
     generateLambdaProxyResponse,
     postToConnection,
     buildBrokerEnvelope,
+    isClientConnection,
+    isGateKeeperConnection,
+    getClientConnectionName,
+    getGateKeeperConnectionName,
 } from './Utils';
 import { BrokerEnvelope } from './BrokerEnvelope';
 
@@ -248,25 +250,33 @@ export async function handler(event: APIGatewayEvent): Promise<any> {
     }
 
     if (eventType === CONNECT_EVENT_TYPE) {
-        if (connectionName.startsWith(CLIENT_CONNECTION_NAME_PREFIX)) {
-            connectionName = connectionName.substring(CLIENT_CONNECTION_NAME_PREFIX.length);
-            return await handleClientConnect(event, connectionName, connectionId);
-        } else if (connectionName.startsWith(GATEKEEPER_CONNECTION_NAME_PREFIX)) {
-            connectionName = connectionName.substring(GATEKEEPER_CONNECTION_NAME_PREFIX.length);
-            return await handleGateKeeperConnect(event, connectionName, connectionId);
-        } else {
-            return generateLambdaProxyResponse(200, 'Connected');
+        if (isClientConnection(connectionName)) {
+            connectionName = getClientConnectionName(connectionName);
+            if (connectionName) {
+                return await handleClientConnect(event, connectionName, connectionId);
+            }
+        } else if (isGateKeeperConnection(connectionName)) {
+            connectionName = getGateKeeperConnectionName(connectionName);
+            if (connectionName) {
+                return await handleGateKeeperConnect(event, connectionName, connectionId);
+            }
         }
+        error(`Invalid request. Connection name is not valid: ${connectionName}`);
+        return generateLambdaProxyResponse(400, 'Invalid connection name');
     } else if (eventType === DISCONNECT_EVENT_TYPE) {
-        if (connectionName.startsWith(CLIENT_CONNECTION_NAME_PREFIX)) {
-            connectionName = connectionName.substring(CLIENT_CONNECTION_NAME_PREFIX.length);
-            return await handleClientDisconnect(event, connectionName, connectionId);
-        } else if (connectionName.startsWith(GATEKEEPER_CONNECTION_NAME_PREFIX)) {
-            connectionName = connectionName.substring(GATEKEEPER_CONNECTION_NAME_PREFIX.length);
-            return await handleGateKeeperDisconnect(event, connectionName, connectionId);
-        } else {
-            return generateLambdaProxyResponse(200, 'Disconnected');
+        if (isClientConnection(connectionName)) {
+            connectionName = getClientConnectionName(connectionName);
+            if (connectionName) {
+               return await handleClientDisconnect(event, connectionName, connectionId);
+            }
+        } else if (isGateKeeperConnection(connectionName)) {
+            connectionName = getGateKeeperConnectionName(connectionName);
+            if (connectionName) {
+                return await handleGateKeeperDisconnect(event, connectionName, connectionId);
+            }
         }
+        error(`Invalid request. Connection name is not valid: ${connectionName}`);
+        return generateLambdaProxyResponse(400, 'Invalid connection name');
     } else {
         error(`Invalid request. Event type is not supported`);
         return generateLambdaProxyResponse(400, 'Invalid event type');

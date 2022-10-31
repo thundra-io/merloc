@@ -14,10 +14,12 @@ import {
 export const CONNECT_EVENT_TYPE = 'CONNECT';
 export const DISCONNECT_EVENT_TYPE = 'DISCONNECT';
 
+export const CONNECTION_TYPE_SEPARATOR = '::';
+export const CONNECTION_API_KEY_SEPARATOR = '##';
 export const CONNECTION_NAME_HEADER_NAME = 'x-api-key';
-export const CLIENT_CONNECTION_NAME_PREFIX = 'client::';
-export const DEFAULT_CLIENT_CONNECTION_NAME = 'default';
-export const GATEKEEPER_CONNECTION_NAME_PREFIX = 'gatekeeper::';
+export const DEFAULT_CONNECTION_NAME = 'default';
+export const CLIENT_CONNECTION_NAME_PREFIX = `client${CONNECTION_TYPE_SEPARATOR}`;
+export const GATEKEEPER_CONNECTION_NAME_PREFIX = `gatekeeper${CONNECTION_TYPE_SEPARATOR}`;
 
 export const BROKER_CONNECTION_TYPE = 'broker';
 export const CLIENT_CONNECTION_TYPE = 'client';
@@ -46,6 +48,49 @@ export function getCurrentTimeInSeconds(): number {
 
 export function getCurrentTimeInMilliSeconds(): number {
     return Date.now();
+}
+
+export function isClientConnection(connectionName: string): boolean {
+    return connectionName.startsWith(CLIENT_CONNECTION_NAME_PREFIX);
+}
+
+export function getClientConnectionName(connectionName: string): string | undefined {
+    if (connectionName.startsWith(CLIENT_CONNECTION_NAME_PREFIX)) {
+        return connectionName.substring(CLIENT_CONNECTION_NAME_PREFIX.length);
+    } else {
+        return undefined;
+    }
+}
+
+export function isGateKeeperConnection(connectionName: string): boolean {
+    return connectionName.startsWith(GATEKEEPER_CONNECTION_NAME_PREFIX);
+}
+
+export function getGateKeeperConnectionName(connectionName: string): string | undefined {
+    if (connectionName.startsWith(GATEKEEPER_CONNECTION_NAME_PREFIX)) {
+        return connectionName.substring(GATEKEEPER_CONNECTION_NAME_PREFIX.length);
+    } else {
+        return undefined;
+    }
+}
+
+export function getConnectionAPIKey(connectionName: string): string | undefined {
+    const idx: number = connectionName.lastIndexOf(CONNECTION_API_KEY_SEPARATOR);
+    if (idx >= 0) {
+        return connectionName.substring(idx + CONNECTION_API_KEY_SEPARATOR.length);
+    } else {
+        return undefined;
+    }
+}
+
+export function getDefaultConnectionName(connectionName: string): string {
+    const connectionAPIKey: string | undefined = getConnectionAPIKey(connectionName);
+    if (connectionAPIKey) {
+        // If connection has API key ("<connection-name>##<api-key>"),
+        // its default connection name is based on its API key ("default##<api-key>")
+        return `${DEFAULT_CONNECTION_NAME}${CONNECTION_TYPE_SEPARATOR}${connectionAPIKey}`;
+    }
+    return DEFAULT_CONNECTION_NAME;
 }
 
 export function generateLambdaProxyResponse(httpCode: number, jsonBody: string) {
