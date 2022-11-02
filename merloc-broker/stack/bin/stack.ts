@@ -22,6 +22,11 @@ const props = {
 const mainStack = new Stack(app, 'merloc-broker-stack', props);
 
 const authorizerStack = new AuthorizerStack(mainStack, 'merloc-broker-authorizer');
+
 const coreStack = new CoreStack(mainStack, 'merloc-broker-core', {
     brokerAuthorizerHandlerFunction: authorizerStack.brokerAuthorizerHandlerFunction
 });
+coreStack.addDependency(
+    authorizerStack,
+    'Uses the AuthorizerHandler Function'
+);
