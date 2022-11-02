@@ -2,9 +2,10 @@ import * as cdk from '@aws-cdk/core';
 import { Duration } from '@aws-cdk/core';
 import * as acm from '@aws-cdk/aws-certificatemanager';
 import * as apigwv2 from '@aws-cdk/aws-apigatewayv2';
+import { WebSocketLambdaAuthorizer } from '@aws-cdk/aws-apigatewayv2-authorizers';
 import { WebSocketLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations';
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
-import { Effect, PolicyStatement } from '@aws-cdk/aws-iam';
+import { Effect, Policy, PolicyStatement } from '@aws-cdk/aws-iam';
 import { Runtime } from '@aws-cdk/aws-lambda';
 import { NodejsFunction } from '@aws-cdk/aws-lambda-nodejs';
 import * as route53 from '@aws-cdk/aws-route53';
@@ -18,21 +19,28 @@ const DEFAULT_BROKER_MESSAGE_HANDLER_FUNCTION_TIMEOUT: string = '30';
 const DEFAULT_BROKER_WS_API_STAGE_NAME = 'dev';
 const DEFAULT_BROKER_WS_API_SUBDOMAIN_NAME = 'merloc';
 
-export class BrokerStack extends cdk.Stack {
+interface BrokerStackProps extends cdk.NestedStackProps {
+  brokerAuthorizerHandlerFunction: NodejsFunction
+}
+
+export class BrokerStack extends cdk.NestedStack {
 
   private readonly clientConnectionsTable: dynamodb.Table;
   private readonly gatekeeperConnectionsTable: dynamodb.Table;
   private readonly clientGatekeeperConnectionPairsTable: dynamodb.Table;
   private readonly brokerConnectionHandlerFunction: NodejsFunction;
   private readonly brokerMessageHandlerFunction: NodejsFunction;
+  private readonly brokerAuthorizerHandlerFunction: NodejsFunction;
   private readonly brokerWebSocketAPICertificate: acm.DnsValidatedCertificate;
   private readonly brokerWebSocketAPIDomainName: apigwv2.DomainName;
   private readonly brokerWebSocketAPIDNSRecord: route53.ARecord;
   private readonly brokerWebSocketAPI: apigwv2.WebSocketApi;
   private readonly brokerWebSocketAPIStage: apigwv2.WebSocketStage;
 
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: cdk.Construct, id: string, props: BrokerStackProps) {
     super(scope, id, props);
+
+    this.brokerAuthorizerHandlerFunction = props.brokerAuthorizerHandlerFunction;
 
     // Create client connections table
     this.clientConnectionsTable = new dynamodb.Table(this, `merloc-client-connections`, {
@@ -122,11 +130,11 @@ export class BrokerStack extends cdk.Stack {
       handler: 'handler',
       runtime: Runtime.NODEJS_16_X,
       timeout: Duration.seconds(parseInt(
-          process.env.MERLOC_BROKER_CONNECTION_HANDLER_FUNCTION_TIMEOUT
-          || DEFAULT_BROKER_CONNECTION_HANDLER_FUNCTION_TIMEOUT)),
+        process.env.MERLOC_BROKER_CONNECTION_HANDLER_FUNCTION_TIMEOUT
+        || DEFAULT_BROKER_CONNECTION_HANDLER_FUNCTION_TIMEOUT)),
       memorySize: parseInt(
-          process.env.MERLOC_BROKER_CONNECTION_HANDLER_FUNCTION_MEMORY_SIZE
-          || DEFAULT_BROKER_CONNECTION_HANDLER_FUNCTION_MEMORY_SIZE),
+        process.env.MERLOC_BROKER_CONNECTION_HANDLER_FUNCTION_MEMORY_SIZE
+        || DEFAULT_BROKER_CONNECTION_HANDLER_FUNCTION_MEMORY_SIZE),
       environment: {
         MERLOC_DEBUG_ENABLE: process.env.MERLOC_DEBUG_ENABLE || DEFAULT_DEBUG_ENABLE,
         MERLOC_CLIENT_CONNECTIONS_TABLE_NAME: this.clientConnectionsTable.tableName,
@@ -164,11 +172,11 @@ export class BrokerStack extends cdk.Stack {
       handler: 'handler',
       runtime: Runtime.NODEJS_16_X,
       timeout: Duration.seconds(parseInt(
-          process.env.MERLOC_BROKER_MESSAGE_HANDLER_FUNCTION_TIMEOUT
-          || DEFAULT_BROKER_MESSAGE_HANDLER_FUNCTION_TIMEOUT)),
+        process.env.MERLOC_BROKER_MESSAGE_HANDLER_FUNCTION_TIMEOUT
+        || DEFAULT_BROKER_MESSAGE_HANDLER_FUNCTION_TIMEOUT)),
       memorySize: parseInt(
-          process.env.MERLOC_BROKER_MESSAGE_HANDLER_FUNCTION_MEMORY_SIZE
-          || DEFAULT_BROKER_MESSAGE_HANDLER_FUNCTION_MEMORY_SIZE),
+        process.env.MERLOC_BROKER_MESSAGE_HANDLER_FUNCTION_MEMORY_SIZE
+        || DEFAULT_BROKER_MESSAGE_HANDLER_FUNCTION_MEMORY_SIZE),
       environment: {
         MERLOC_DEBUG_ENABLE: process.env.MERLOC_DEBUG_ENABLE || DEFAULT_DEBUG_ENABLE,
         MERLOC_CLIENT_CONNECTIONS_TABLE_NAME: this.clientConnectionsTable.tableName,
@@ -187,6 +195,11 @@ export class BrokerStack extends cdk.Stack {
       apiName: 'merloc-broker-ws-api',
       connectRouteOptions: {
         integration: new WebSocketLambdaIntegration('connectionIntegration', this.brokerConnectionHandlerFunction),
+        authorizer: new WebSocketLambdaAuthorizer('connectionAuthorizer', this.brokerAuthorizerHandlerFunction, {
+          identitySource: [
+            'route.request.header.x-api-key'
+          ]
+        })
       },
       disconnectRouteOptions: {
         integration: new WebSocketLambdaIntegration('disconnectIntegration', this.brokerConnectionHandlerFunction),
@@ -212,9 +225,9 @@ export class BrokerStack extends cdk.Stack {
     // Check whether custom domain name is specified
     if (process.env.MERLOC_DOMAIN_NAME) {
       const brokerWebSocketAPISubDomainName: string =
-          process.env.MERLOC_BROKER_WS_API_SUBDOMAIN_NAME || DEFAULT_BROKER_WS_API_SUBDOMAIN_NAME;
+        process.env.MERLOC_BROKER_WS_API_SUBDOMAIN_NAME || DEFAULT_BROKER_WS_API_SUBDOMAIN_NAME;
       const brokerWebSocketAPIFullDomainName: string =
-          `${brokerWebSocketAPISubDomainName}.${process.env.MERLOC_DOMAIN_NAME}`;
+        `${brokerWebSocketAPISubDomainName}.${process.env.MERLOC_DOMAIN_NAME}`;
 
       const zone: route53.IHostedZone = route53.HostedZone.fromLookup(this, `merloc-zone`, {
         domainName: `${process.env.MERLOC_DOMAIN_NAME}`
@@ -246,9 +259,9 @@ export class BrokerStack extends cdk.Stack {
         zone: zone,
         recordName: brokerWebSocketAPISubDomainName,
         target: route53.RecordTarget.fromAlias(
-            new route53Target.ApiGatewayv2DomainProperties(
-                this.brokerWebSocketAPIDomainName.regionalDomainName,
-                this.brokerWebSocketAPIDomainName.regionalHostedZoneId)),
+          new route53Target.ApiGatewayv2DomainProperties(
+            this.brokerWebSocketAPIDomainName.regionalDomainName,
+            this.brokerWebSocketAPIDomainName.regionalHostedZoneId)),
       });
     }
 
@@ -258,9 +271,9 @@ export class BrokerStack extends cdk.Stack {
       stageName: process.env.MERLOC_BROKER_WS_API_STAGE_NAME || DEFAULT_BROKER_WS_API_STAGE_NAME,
       autoDeploy: true,
       domainMapping:
-          this.brokerWebSocketAPIDomainName
+        this.brokerWebSocketAPIDomainName
           ? {
-              domainName: this.brokerWebSocketAPIDomainName,
+            domainName: this.brokerWebSocketAPIDomainName,
           }
           : undefined,
     });
@@ -284,14 +297,22 @@ export class BrokerStack extends cdk.Stack {
         `arn:aws:execute-api:${this.region}:${this.account}:${this.brokerWebSocketAPI.apiId}/${this.brokerWebSocketAPIStage.stageName}/*`,
       ],
       actions: [
-          'execute-api:ManageConnections',
-          'execute-api:Invoke',
+        'execute-api:ManageConnections',
+        'execute-api:Invoke',
       ],
     });
 
     // Give access to broker connection and message handler functions for broker API management
     this.brokerConnectionHandlerFunction.addToRolePolicy(allowConnectionManagementOnApiGatewayPolicy);
     this.brokerMessageHandlerFunction.addToRolePolicy(allowConnectionManagementOnApiGatewayPolicy);
-  }
 
+    // To workaround the circular dependency
+    this.brokerAuthorizerHandlerFunction.role!.attachInlinePolicy(
+      new Policy(this, 'broker-authorizer-handler-policy', {
+        statements: [
+          allowConnectionManagementOnApiGatewayPolicy
+        ]
+      })
+    );
+  }
 }

@@ -4,4 +4,4 @@ set -e
 
 npm install
 cdk bootstrap --no-color
-cdk deploy merloc-broker --require-approval never --no-color
+cdk deploy merloc-broker-stack --require-approval never --no-color
