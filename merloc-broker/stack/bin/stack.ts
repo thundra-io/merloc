@@ -2,7 +2,9 @@
 import { config, DotenvConfigOutput } from "dotenv";
 import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
-import { BrokerStack } from '../lib/BrokerStack';
+import { CoreStack } from '../lib/CoreStack';
+import { Stack } from "@aws-cdk/core";
+import { AuthorizerStack } from "../lib/AuthorizerStack";
 
 const result: DotenvConfigOutput = config({ path: `${__dirname}/../.env` });
 if (result.error) {
@@ -17,4 +19,19 @@ const props = {
     },
 };
 
-new BrokerStack(app, 'merloc-broker', props);
+const mainStack = new Stack(app, 'merloc-broker-stack', props);
+
+const authorizerStack = new AuthorizerStack(mainStack, 'merloc-broker-authorizer');
+
+const coreStack = new CoreStack(mainStack, 'merloc-broker-core', {
+    brokerAuthorizerHandlerFunction: authorizerStack.brokerAuthorizerHandlerFunction
+});
+coreStack.addDependency(
+    authorizerStack,
+    'Uses the AuthorizerHandler Function'
+);
+
+new cdk.CfnOutput(mainStack, `merloc-broker-url-output`, {
+    value: coreStack.brokerURL(),
+    exportName: `merloc-broker-url`,
+});

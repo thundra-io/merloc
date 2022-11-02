@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import { BrokerStack } from '../lib/BrokerStack';
+import { BrokerStack } from '../lib/CoreStack';
 
 test('Broker Stack Created', () => {
     const app = new cdk.App();
