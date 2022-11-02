@@ -19,11 +19,11 @@ const DEFAULT_BROKER_MESSAGE_HANDLER_FUNCTION_TIMEOUT: string = '30';
 const DEFAULT_BROKER_WS_API_STAGE_NAME = 'dev';
 const DEFAULT_BROKER_WS_API_SUBDOMAIN_NAME = 'merloc';
 
-interface BrokerStackProps extends cdk.NestedStackProps {
+interface CoreStackProps extends cdk.NestedStackProps {
   brokerAuthorizerHandlerFunction: NodejsFunction
 }
 
-export class BrokerStack extends cdk.NestedStack {
+export class CoreStack extends cdk.NestedStack {
 
   private readonly clientConnectionsTable: dynamodb.Table;
   private readonly gatekeeperConnectionsTable: dynamodb.Table;
@@ -37,7 +37,7 @@ export class BrokerStack extends cdk.NestedStack {
   private readonly brokerWebSocketAPI: apigwv2.WebSocketApi;
   private readonly brokerWebSocketAPIStage: apigwv2.WebSocketStage;
 
-  constructor(scope: cdk.Construct, id: string, props: BrokerStackProps) {
+  constructor(scope: cdk.Construct, id: string, props: CoreStackProps) {
     super(scope, id, props);
 
     this.brokerAuthorizerHandlerFunction = props.brokerAuthorizerHandlerFunction;
