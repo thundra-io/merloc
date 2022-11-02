@@ -73,6 +73,11 @@ export async function handler(event: APIGatewayEvent): Promise<any> {
     let apiKey: string | undefined;
     let principalId: string | undefined = identityKey;
 
+    // TODO
+    // For keeping backward compatibility with old clients and gatekeepers,
+    // we are extracting/decoding connection type, name and API key from identity key passed over `x-api-key` header.
+    // While keeping support of this protocol for backward compatibility, we might also add another mechanism
+    // by passing connection type, name and API key through custom headers individually.
     if (isClientConnection(identityKey)) {
         connectionType = CLIENT_CONNECTION_TYPE;
         connectionName = getClientConnectionName(identityKey);
@@ -87,13 +92,15 @@ export async function handler(event: APIGatewayEvent): Promise<any> {
         }
     }
 
+    debug(`Connection type: ${connectionType}, connection name: ${connectionName}, API key: ${apiKey}`);
+
     if (!connectionType) {
-        error(`Invalid auth request. Connection type is not valid: ${connectionType}`);
+        error('Invalid auth request. Connection type could not be detected');
         return _denyAccess(event);
     }
 
     if (!connectionName) {
-        error(`Invalid auth request. Connection name is not valid: ${connectionName}`);
+        error('Invalid auth request. Connection name could not be detected');
         return _denyAccess(event);
     }
 
