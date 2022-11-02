@@ -26,12 +26,12 @@ function _denyAccess(event: APIGatewayEvent): any {
 }
 
 function _allowAccess(event: APIGatewayEvent,
-                      identityKey: string,
+                      principalId: string,
                       connectionType: string,
                       connectionName: string,
                       apiKey?: string): any {
     return {
-        principalId: identityKey,
+        principalId: principalId,
         policyDocument: {
             Version: '2012-10-17',
             Statement: [
@@ -50,6 +50,15 @@ function _allowAccess(event: APIGatewayEvent,
     }
 }
 
+function _checkAPIKey(identityKey: string, apiKey: string): string | undefined {
+    // TODO
+    // Implement your custom API check mechanism here.
+    // Then
+    //  - return principal id (user id, account id, ...) if it succeeds
+    //  - or return nothing if it fails
+    return identityKey;
+}
+
 export async function handler(event: APIGatewayEvent): Promise<any> {
     debug(`Received auth request: ${JSON.stringify(event)}`);
 
@@ -62,6 +71,7 @@ export async function handler(event: APIGatewayEvent): Promise<any> {
     let connectionType: string | undefined;
     let connectionName: string | undefined;
     let apiKey: string | undefined;
+    let principalId: string | undefined = identityKey;
 
     if (isClientConnection(identityKey)) {
         connectionType = CLIENT_CONNECTION_TYPE;
@@ -87,10 +97,18 @@ export async function handler(event: APIGatewayEvent): Promise<any> {
         return _denyAccess(event);
     }
 
-    if (process.env.MERLOC_BROKER_AUTHORIZER_API_KEY_REQUIRED === 'true' && !apiKey) {
-        error('Invalid auth request. API key is required');
-        return _denyAccess(event);
+    if (process.env.MERLOC_BROKER_AUTHORIZER_API_KEY_CHECK_ENABLE === 'true') {
+        if (apiKey) {
+            principalId = _checkAPIKey(identityKey, apiKey);
+            if (!principalId) {
+                error(`Invalid auth request. API key check failed: ${apiKey}`);
+                return _denyAccess(event);
+            }
+        } else {
+            error('Invalid auth request. API key is required');
+            return _denyAccess(event);
+        }
     }
 
-    return _allowAccess(event, identityKey, connectionType, connectionName, apiKey);
+    return _allowAccess(event, principalId, connectionType, connectionName, apiKey);
 }
