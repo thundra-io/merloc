@@ -11,13 +11,17 @@ export function debug(msg: string) {
 }
 
 export function info(msg: string) {
-    console.info('[MERLOC]', msg)
+    console.info('[MERLOC]', msg);
 }
 
 export function warn(msg: string) {
-    console.warn('[MERLOC]', msg)
+    console.warn('[MERLOC]', msg);
 }
 
 export function error(msg: string, e?: Error) {
-    console.error('[MERLOC]', msg, e)
+    if (e) {
+        console.error('[MERLOC]', msg, e);
+    } else {
+        console.error('[MERLOC]', msg);
+    }
 }

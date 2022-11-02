@@ -30,3 +30,8 @@ coreStack.addDependency(
     authorizerStack,
     'Uses the AuthorizerHandler Function'
 );
+
+new cdk.CfnOutput(mainStack, `merloc-broker-url-output`, {
+    value: coreStack.brokerURL(),
+    exportName: `merloc-broker-url`,
+});

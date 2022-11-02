@@ -6,6 +6,7 @@ import { NodejsFunction } from '@aws-cdk/aws-lambda-nodejs';
 const DEFAULT_DEBUG_ENABLE = 'true';
 const DEFAULT_BROKER_AUTHORIZER_HANDLER_FUNCTION_MEMORY_SIZE: string = '1024';
 const DEFAULT_BROKER_AUTHORIZER_HANDLER_FUNCTION_TIMEOUT: string = '30';
+const DEFAULT_API_KEY_REQUIRED = 'false';
 
 export class AuthorizerStack extends cdk.NestedStack {
 
@@ -38,12 +39,14 @@ export class AuthorizerStack extends cdk.NestedStack {
       runtime: Runtime.NODEJS_16_X,
       timeout: Duration.seconds(parseInt(
         process.env.MERLOC_BROKER_AUTHORIZATION_HANDLER_FUNCTION_TIMEOUT
-        || DEFAULT_BROKER_AUTHORIZER_HANDLER_FUNCTION_TIMEOUT)),
+          || DEFAULT_BROKER_AUTHORIZER_HANDLER_FUNCTION_TIMEOUT)),
       memorySize: parseInt(
         process.env.MERLOC_BROKER_AUTHORIZATION_HANDLER_FUNCTION_MEMORY_SIZE
-        || DEFAULT_BROKER_AUTHORIZER_HANDLER_FUNCTION_MEMORY_SIZE),
+          || DEFAULT_BROKER_AUTHORIZER_HANDLER_FUNCTION_MEMORY_SIZE),
       environment: {
         MERLOC_DEBUG_ENABLE: process.env.MERLOC_DEBUG_ENABLE || DEFAULT_DEBUG_ENABLE,
+        MERLOC_BROKER_AUTHORIZER_API_KEY_REQUIRED:
+            process.env.MERLOC_BROKER_AUTHORIZER_API_KEY_REQUIRED || DEFAULT_API_KEY_REQUIRED,
       }
     });
   }

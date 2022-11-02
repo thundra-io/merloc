@@ -131,10 +131,10 @@ export class CoreStack extends cdk.NestedStack {
       runtime: Runtime.NODEJS_16_X,
       timeout: Duration.seconds(parseInt(
         process.env.MERLOC_BROKER_CONNECTION_HANDLER_FUNCTION_TIMEOUT
-        || DEFAULT_BROKER_CONNECTION_HANDLER_FUNCTION_TIMEOUT)),
+          || DEFAULT_BROKER_CONNECTION_HANDLER_FUNCTION_TIMEOUT)),
       memorySize: parseInt(
         process.env.MERLOC_BROKER_CONNECTION_HANDLER_FUNCTION_MEMORY_SIZE
-        || DEFAULT_BROKER_CONNECTION_HANDLER_FUNCTION_MEMORY_SIZE),
+          || DEFAULT_BROKER_CONNECTION_HANDLER_FUNCTION_MEMORY_SIZE),
       environment: {
         MERLOC_DEBUG_ENABLE: process.env.MERLOC_DEBUG_ENABLE || DEFAULT_DEBUG_ENABLE,
         MERLOC_CLIENT_CONNECTIONS_TABLE_NAME: this.clientConnectionsTable.tableName,
@@ -173,10 +173,10 @@ export class CoreStack extends cdk.NestedStack {
       runtime: Runtime.NODEJS_16_X,
       timeout: Duration.seconds(parseInt(
         process.env.MERLOC_BROKER_MESSAGE_HANDLER_FUNCTION_TIMEOUT
-        || DEFAULT_BROKER_MESSAGE_HANDLER_FUNCTION_TIMEOUT)),
+          || DEFAULT_BROKER_MESSAGE_HANDLER_FUNCTION_TIMEOUT)),
       memorySize: parseInt(
         process.env.MERLOC_BROKER_MESSAGE_HANDLER_FUNCTION_MEMORY_SIZE
-        || DEFAULT_BROKER_MESSAGE_HANDLER_FUNCTION_MEMORY_SIZE),
+          || DEFAULT_BROKER_MESSAGE_HANDLER_FUNCTION_MEMORY_SIZE),
       environment: {
         MERLOC_DEBUG_ENABLE: process.env.MERLOC_DEBUG_ENABLE || DEFAULT_DEBUG_ENABLE,
         MERLOC_CLIENT_CONNECTIONS_TABLE_NAME: this.clientConnectionsTable.tableName,
@@ -314,5 +314,9 @@ export class CoreStack extends cdk.NestedStack {
         ]
       })
     );
+  }
+
+  brokerURL(): string {
+    return this.brokerWebSocketAPIStage.url;
   }
 }
