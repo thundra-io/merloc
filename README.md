@@ -57,7 +57,7 @@ Make sure that Docker is up and running before running this command as Docker is
 If you want to configure the region to deploy the broker, you can specify it by environment variable. 
 For example to deploy the broker into us-west-2 region:
 ```
-AWS_REGION=us-west-2 ./deploy.sh
+AWS_REGION=us-west-2 PROFILE=dev ./deploy.sh
 ```
 
 - Note the broker URL. Because we will use this url later to configure the MerLoc AWS Lambda runtime and the MerLoc GateKeeper.
