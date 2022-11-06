@@ -6,7 +6,7 @@ import { CoreStack } from '../lib/CoreStack';
 import { Stack } from "@aws-cdk/core";
 import { AuthorizerStack } from "../lib/AuthorizerStack";
 
-const result: DotenvConfigOutput = config({ path: `${__dirname}/../.env` });
+const result: DotenvConfigOutput = config({ path: `${__dirname}/../../${process.env.PROFILE}/.env` });
 if (result.error) {
     throw result.error;
 }

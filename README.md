@@ -49,7 +49,7 @@ cd merloc-broker/stack
 
 - Start deploy
 ```
-./deploy.sh
+PROFILE=dev ./deploy.sh
 ```
 
 Make sure that Docker is up and running before running this command as Docker is used to compile and build broker Lambda functions.

@@ -108,8 +108,8 @@ export class CoreStack extends cdk.NestedStack {
 
     // Create broker connection handler function
     this.brokerConnectionHandlerFunction = new NodejsFunction(this, 'merloc-broker-connection-handler', {
-      entry: `${__dirname}/../../src/lambdas/ConnectionHandler.ts`,
-      depsLockFilePath: `${__dirname}/../../src/package-lock.json`,
+      entry: `${__dirname}/../../../src/lambdas/ConnectionHandler.ts`,
+      depsLockFilePath: `${__dirname}/../../../src/package-lock.json`,
       bundling: {
         commandHooks: {
           beforeBundling(inputDir: string, outputDir: string) {
