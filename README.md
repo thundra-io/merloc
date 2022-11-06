@@ -44,7 +44,7 @@ on your local `order-notification-service` and run as a part of real flow in the
 
 - Go to broker stack deploy folder
 ```
-cd merloc-broker/stack
+cd merloc-broker/stack/deployment
 ```
 
 - Start deploy
