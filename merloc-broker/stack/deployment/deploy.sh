@@ -10,7 +10,7 @@ then
   exit 1
 fi
 
-pushd app/
+pushd ../app/
 
 npm install
 cdk bootstrap --no-color

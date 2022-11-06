@@ -15,7 +15,7 @@ export class AuthorizerStack extends cdk.NestedStack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.NestedStackProps) {
     super(scope, id, props);
 
-    this.brokerAuthorizerHandlerFunction = new NodejsFunction(this, 'merloc-broker-authorizer-handler', {
+    this.brokerAuthorizerHandlerFunction = new NodejsFunction(this, `merloc-broker-authorizer-handler-${process.env.STAGE}`, {
       entry: `${__dirname}/../../../src/lambdas/AuthorizerHandler.ts`,
       depsLockFilePath: `${__dirname}/../../../src/package-lock.json`,
       bundling: {
@@ -34,7 +34,7 @@ export class AuthorizerStack extends cdk.NestedStack {
           }
         }
       },
-      functionName: 'merloc-broker-authorizer-handler',
+      functionName: `merloc-broker-authorizer-handler-${process.env.STAGE}`,
       handler: 'handler',
       runtime: Runtime.NODEJS_16_X,
       timeout: Duration.seconds(parseInt(
