@@ -6,7 +6,7 @@ import { CoreStack } from '../lib/CoreStack';
 import { Stack } from "@aws-cdk/core";
 import { AuthorizerStack } from "../lib/AuthorizerStack";
 
-const result: DotenvConfigOutput = config({ path: `${__dirname}/../.env` });
+const result: DotenvConfigOutput = config({ path: `${__dirname}/../../deployment/${process.env.PROFILE}/.env` });
 if (result.error) {
     throw result.error;
 }
@@ -19,11 +19,11 @@ const props = {
     },
 };
 
-const mainStack = new Stack(app, 'merloc-broker-stack', props);
+const mainStack = new Stack(app, `merloc-broker-stack-${process.env.STAGE}`, props);
 
-const authorizerStack = new AuthorizerStack(mainStack, 'merloc-broker-authorizer');
+const authorizerStack = new AuthorizerStack(mainStack, `merloc-broker-authorizer-${process.env.STAGE}`);
 
-const coreStack = new CoreStack(mainStack, 'merloc-broker-core', {
+const coreStack = new CoreStack(mainStack, `merloc-broker-core-${process.env.STAGE}`, {
     brokerAuthorizerHandlerFunction: authorizerStack.brokerAuthorizerHandlerFunction
 });
 coreStack.addDependency(
@@ -31,7 +31,7 @@ coreStack.addDependency(
     'Uses the AuthorizerHandler Function'
 );
 
-new cdk.CfnOutput(mainStack, `merloc-broker-url-output`, {
+new cdk.CfnOutput(mainStack, `merloc-broker-url-output-${process.env.STAGE}`, {
     value: coreStack.brokerURL(),
-    exportName: `merloc-broker-url`,
+    exportName: `merloc-broker-url-${process.env.STAGE}`,
 });

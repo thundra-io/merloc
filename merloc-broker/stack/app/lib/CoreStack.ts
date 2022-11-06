@@ -43,8 +43,8 @@ export class CoreStack extends cdk.NestedStack {
     this.brokerAuthorizerHandlerFunction = props.brokerAuthorizerHandlerFunction;
 
     // Create client connections table
-    this.clientConnectionsTable = new dynamodb.Table(this, `merloc-client-connections`, {
-      tableName: `merloc-client-connections`,
+    this.clientConnectionsTable = new dynamodb.Table(this, `merloc-client-connections-${process.env.STAGE}`, {
+      tableName: `merloc-client-connections-${process.env.STAGE}`,
       partitionKey: {
         name: 'name',
         type: dynamodb.AttributeType.STRING,
@@ -53,18 +53,18 @@ export class CoreStack extends cdk.NestedStack {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
-    new cdk.CfnOutput(this, `merloc-client-connections-table-name-output`, {
+    new cdk.CfnOutput(this, `merloc-client-connections-table-name-output-${process.env.STAGE}`, {
       value: this.clientConnectionsTable.tableName,
-      exportName: `merloc-client-connections-table-name`,
+      exportName: `merloc-client-connections-table-name-${process.env.STAGE}`,
     });
-    new cdk.CfnOutput(this, `merloc-client-connections-table-arn-output`, {
+    new cdk.CfnOutput(this, `merloc-client-connections-table-arn-output-${process.env.STAGE}`, {
       value: this.clientConnectionsTable.tableArn,
-      exportName: `merloc-client-connections-table-arn`,
+      exportName: `merloc-client-connections-table-arn-${process.env.STAGE}`,
     });
 
     // Create gatekeeper connections table
-    this.gatekeeperConnectionsTable = new dynamodb.Table(this, `merloc-gatekeeper-connections`, {
-      tableName: `merloc-gatekeeper-connections`,
+    this.gatekeeperConnectionsTable = new dynamodb.Table(this, `merloc-gatekeeper-connections-${process.env.STAGE}`, {
+      tableName: `merloc-gatekeeper-connections-${process.env.STAGE}`,
       partitionKey: {
         name: 'id',
         type: dynamodb.AttributeType.STRING,
@@ -73,18 +73,18 @@ export class CoreStack extends cdk.NestedStack {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
-    new cdk.CfnOutput(this, `merloc-gatekeeper-connections-table-name-output`, {
+    new cdk.CfnOutput(this, `merloc-gatekeeper-connections-table-name-output-${process.env.STAGE}`, {
       value: this.gatekeeperConnectionsTable.tableName,
-      exportName: `merloc-gatekeeper-connections-table-name`,
+      exportName: `merloc-gatekeeper-connections-table-name-${process.env.STAGE}`,
     });
-    new cdk.CfnOutput(this, `merloc-gatekeeper-connections-table-arn-output`, {
+    new cdk.CfnOutput(this, `merloc-gatekeeper-connections-table-arn-output-${process.env.STAGE}`, {
       value: this.gatekeeperConnectionsTable.tableArn,
-      exportName: `merloc-gatekeeper-connections-table-arn`,
+      exportName: `merloc-gatekeeper-connections-table-arn-${process.env.STAGE}`,
     });
 
     // Create client-gatekeeper connection pairs table
-    this.clientGatekeeperConnectionPairsTable = new dynamodb.Table(this, `merloc-client-gatekeeper-connection-pairs`, {
-      tableName: `merloc-client-gatekeeper-connection-pairs`,
+    this.clientGatekeeperConnectionPairsTable = new dynamodb.Table(this, `merloc-client-gatekeeper-connection-pairs-${process.env.STAGE}`, {
+      tableName: `merloc-client-gatekeeper-connection-pairs-${process.env.STAGE}`,
       partitionKey: {
         name: 'clientConnectionId',
         type: dynamodb.AttributeType.STRING,
@@ -97,19 +97,19 @@ export class CoreStack extends cdk.NestedStack {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
-    new cdk.CfnOutput(this, `merloc-client-gatekeeper-connection-pairs-table-name-output`, {
+    new cdk.CfnOutput(this, `merloc-client-gatekeeper-connection-pairs-table-name-output-${process.env.STAGE}`, {
       value: this.clientGatekeeperConnectionPairsTable.tableName,
-      exportName: `merloc-client-gatekeeper-connection-pairs-table-name`,
+      exportName: `merloc-client-gatekeeper-connection-pairs-table-name-${process.env.STAGE}`,
     });
-    new cdk.CfnOutput(this, `merloc-client-gatekeeper-connection-pairs-table-arn-output`, {
+    new cdk.CfnOutput(this, `merloc-client-gatekeeper-connection-pairs-table-arn-output-${process.env.STAGE}`, {
       value: this.clientGatekeeperConnectionPairsTable.tableArn,
-      exportName: `merloc-client-gatekeeper-connection-pairs-table-arn`,
+      exportName: `merloc-client-gatekeeper-connection-pairs-table-arn-${process.env.STAGE}`,
     });
 
     // Create broker connection handler function
-    this.brokerConnectionHandlerFunction = new NodejsFunction(this, 'merloc-broker-connection-handler', {
-      entry: `${__dirname}/../../src/lambdas/ConnectionHandler.ts`,
-      depsLockFilePath: `${__dirname}/../../src/package-lock.json`,
+    this.brokerConnectionHandlerFunction = new NodejsFunction(this, `merloc-broker-connection-handler-${process.env.STAGE}`, {
+      entry: `${__dirname}/../../../src/lambdas/ConnectionHandler.ts`,
+      depsLockFilePath: `${__dirname}/../../../src/package-lock.json`,
       bundling: {
         commandHooks: {
           beforeBundling(inputDir: string, outputDir: string) {
@@ -126,7 +126,7 @@ export class CoreStack extends cdk.NestedStack {
           }
         }
       },
-      functionName: 'merloc-broker-connection-handler',
+      functionName: `merloc-broker-connection-handler-${process.env.STAGE}`,
       handler: 'handler',
       runtime: Runtime.NODEJS_16_X,
       timeout: Duration.seconds(parseInt(
@@ -149,9 +149,9 @@ export class CoreStack extends cdk.NestedStack {
     this.clientGatekeeperConnectionPairsTable.grantReadWriteData(this.brokerConnectionHandlerFunction);
 
     // Create broker message handler function
-    this.brokerMessageHandlerFunction = new NodejsFunction(this, 'merloc-broker-message-handler', {
-      entry: `${__dirname}/../../src/lambdas/MessageHandler.ts`,
-      depsLockFilePath: `${__dirname}/../../src/package-lock.json`,
+    this.brokerMessageHandlerFunction = new NodejsFunction(this, `merloc-broker-message-handler-${process.env.STAGE}`, {
+      entry: `${__dirname}/../../../src/lambdas/MessageHandler.ts`,
+      depsLockFilePath: `${__dirname}/../../../src/package-lock.json`,
       bundling: {
         commandHooks: {
           beforeBundling(inputDir: string, outputDir: string) {
@@ -168,7 +168,7 @@ export class CoreStack extends cdk.NestedStack {
           }
         }
       },
-      functionName: 'merloc-broker-message-handler',
+      functionName: `merloc-broker-message-handler-${process.env.STAGE}`,
       handler: 'handler',
       runtime: Runtime.NODEJS_16_X,
       timeout: Duration.seconds(parseInt(
@@ -191,8 +191,8 @@ export class CoreStack extends cdk.NestedStack {
     this.clientGatekeeperConnectionPairsTable.grantReadWriteData(this.brokerMessageHandlerFunction);
 
     // Create broker websocket API
-    this.brokerWebSocketAPI = new apigwv2.WebSocketApi(this, 'merloc-broker-ws-api', {
-      apiName: 'merloc-broker-ws-api',
+    this.brokerWebSocketAPI = new apigwv2.WebSocketApi(this, `merloc-broker-ws-api-${process.env.STAGE}`, {
+      apiName: `merloc-broker-ws-api-${process.env.STAGE}`,
       connectRouteOptions: {
         integration: new WebSocketLambdaIntegration('connectionIntegration', this.brokerConnectionHandlerFunction),
         authorizer: new WebSocketLambdaAuthorizer('connectionAuthorizer', this.brokerAuthorizerHandlerFunction, {
@@ -209,17 +209,17 @@ export class CoreStack extends cdk.NestedStack {
       },
       routeSelectionExpression: '$request.body.type',
     });
-    new cdk.CfnOutput(this, `merloc-broker-ws-api-name-output`, {
+    new cdk.CfnOutput(this, `merloc-broker-ws-api-name-output-${process.env.STAGE}`, {
       value: this.brokerWebSocketAPI.webSocketApiName || '',
-      exportName: `merloc-broker-ws-api-name`,
+      exportName: `merloc-broker-ws-api-name-${process.env.STAGE}`,
     });
-    new cdk.CfnOutput(this, `merloc-broker-ws-api-id-output`, {
+    new cdk.CfnOutput(this, `merloc-broker-ws-api-id-output-${process.env.STAGE}`, {
       value: this.brokerWebSocketAPI.apiId,
-      exportName: `merloc-broker-ws-api-id`,
+      exportName: `merloc-broker-ws-api-id-${process.env.STAGE}`,
     });
-    new cdk.CfnOutput(this, `merloc-broker-ws-api-endpoint-output`, {
+    new cdk.CfnOutput(this, `merloc-broker-ws-api-endpoint-output-${process.env.STAGE}`, {
       value: this.brokerWebSocketAPI.apiEndpoint,
-      exportName: `merloc-broker-ws-api-endpoint`,
+      exportName: `merloc-broker-ws-api-endpoint-${process.env.STAGE}`,
     });
 
     // Check whether custom domain name is specified
@@ -229,33 +229,33 @@ export class CoreStack extends cdk.NestedStack {
       const brokerWebSocketAPIFullDomainName: string =
         `${brokerWebSocketAPISubDomainName}.${process.env.MERLOC_DOMAIN_NAME}`;
 
-      const zone: route53.IHostedZone = route53.HostedZone.fromLookup(this, `merloc-zone`, {
+      const zone: route53.IHostedZone = route53.HostedZone.fromLookup(this, `merloc-zone-${process.env.STAGE}`, {
         domainName: `${process.env.MERLOC_DOMAIN_NAME}`
       });
 
       // Create broker websocket API certificate
-      this.brokerWebSocketAPICertificate = new acm.DnsValidatedCertificate(this, `merloc-broker-ws-api-certificate`, {
+      this.brokerWebSocketAPICertificate = new acm.DnsValidatedCertificate(this, `merloc-broker-ws-api-certificate-${process.env.STAGE}`, {
         domainName: `${brokerWebSocketAPIFullDomainName}`,
         subjectAlternativeNames: [`*.${brokerWebSocketAPIFullDomainName}`],
         hostedZone: zone,
       });
-      new cdk.CfnOutput(this, `merloc-broker-ws-api-certificate-arn-output`, {
+      new cdk.CfnOutput(this, `merloc-broker-ws-api-certificate-arn-output-${process.env.STAGE}`, {
         value: this.brokerWebSocketAPICertificate.certificateArn,
-        exportName: `merloc-broker-ws-api-certificate-arn`,
+        exportName: `merloc-broker-ws-api-certificate-arn-${process.env.STAGE}`,
       });
 
       // Create broker websocket API custom domain name
-      this.brokerWebSocketAPIDomainName = new apigwv2.DomainName(this, `merloc-broker-ws-api-domain-name`, {
+      this.brokerWebSocketAPIDomainName = new apigwv2.DomainName(this, `merloc-broker-ws-api-domain-name-${process.env.STAGE}`, {
         domainName: brokerWebSocketAPIFullDomainName,
         certificate: this.brokerWebSocketAPICertificate,
       });
-      new cdk.CfnOutput(this, `merloc-broker-ws-api-domain-name-output`, {
+      new cdk.CfnOutput(this, `merloc-broker-ws-api-domain-name-output-${process.env.STAGE}`, {
         value: this.brokerWebSocketAPIDomainName.name,
-        exportName: `merloc-broker-ws-api-domain-name`,
+        exportName: `merloc-broker-ws-api-domain-name-${process.env.STAGE}`,
       });
 
       // Create DNS record which points to broker websocket API custom domain name
-      this.brokerWebSocketAPIDNSRecord = new route53.ARecord(this, `merloc-broker-ws-api-dns-record`, {
+      this.brokerWebSocketAPIDNSRecord = new route53.ARecord(this, `merloc-broker-ws-api-dns-record-${process.env.STAGE}`, {
         zone: zone,
         recordName: brokerWebSocketAPISubDomainName,
         target: route53.RecordTarget.fromAlias(
@@ -266,9 +266,9 @@ export class CoreStack extends cdk.NestedStack {
     }
 
     // Create broker websocket API stage
-    this.brokerWebSocketAPIStage = new apigwv2.WebSocketStage(this, 'merloc-broker-ws-api-stage', {
+    this.brokerWebSocketAPIStage = new apigwv2.WebSocketStage(this, `merloc-broker-ws-api-stage-${process.env.STAGE}`, {
       webSocketApi: this.brokerWebSocketAPI,
-      stageName: process.env.MERLOC_BROKER_WS_API_STAGE_NAME || DEFAULT_BROKER_WS_API_STAGE_NAME,
+      stageName: process.env.STAGE || DEFAULT_BROKER_WS_API_STAGE_NAME,
       autoDeploy: true,
       domainMapping:
         this.brokerWebSocketAPIDomainName
@@ -277,17 +277,17 @@ export class CoreStack extends cdk.NestedStack {
           }
           : undefined,
     });
-    new cdk.CfnOutput(this, `merloc-broker-ws-api-stage-name-output`, {
+    new cdk.CfnOutput(this, `merloc-broker-ws-api-stage-name-output-${process.env.STAGE}`, {
       value: this.brokerWebSocketAPIStage.stageName,
-      exportName: `merloc-broker-ws-api-stage-name`,
+      exportName: `merloc-broker-ws-api-stage-name-${process.env.STAGE}`,
     });
-    new cdk.CfnOutput(this, `merloc-broker-ws-api-stage-url-output`, {
+    new cdk.CfnOutput(this, `merloc-broker-ws-api-stage-url-output-${process.env.STAGE}`, {
       value: this.brokerWebSocketAPIStage.url,
-      exportName: `merloc-broker-ws-api-stage-url`,
+      exportName: `merloc-broker-ws-api-stage-url-${process.env.STAGE}`,
     });
-    new cdk.CfnOutput(this, `merloc-broker-ws-api-stage-callback-url-output`, {
+    new cdk.CfnOutput(this, `merloc-broker-ws-api-stage-callback-url-output-${process.env.STAGE}`, {
       value: this.brokerWebSocketAPIStage.callbackUrl,
-      exportName: `merloc-broker-ws-api-stage-callback-url`,
+      exportName: `merloc-broker-ws-api-stage-callback-url-${process.env.STAGE}`,
     });
 
     // Create policy to allow Lambda function to use @connections API of API Gateway
@@ -308,7 +308,7 @@ export class CoreStack extends cdk.NestedStack {
 
     // To workaround the circular dependency
     this.brokerAuthorizerHandlerFunction.role!.attachInlinePolicy(
-      new Policy(this, 'broker-authorizer-handler-policy', {
+      new Policy(this, `broker-authorizer-handler-policy-${process.env.STAGE}`, {
         statements: [
           allowConnectionManagementOnApiGatewayPolicy
         ]
