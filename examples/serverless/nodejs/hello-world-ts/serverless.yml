@@ -1,0 +1,57 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: hello-world-ts
+# app and org for use with dashboard.serverless.com
+#app: your-app-name
+#org: your-org-name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: "eu-west-2"
+
+functions:
+  hello:
+    # handler: handler.hello
+    handler: src/functions/hello/handler.main
+    timeout: 120
+    layers:
+      - "arn:aws:lambda:eu-west-2:269863060030:layer:merloc-gatekeeper:15"
+    environment:
+      AWS_LAMBDA_EXEC_WRAPPER: /opt/extensions/merloc-gatekeeper-ext/bootstrap
+      MERLOC_BROKER_URL: "wss://23umd9f64e.execute-api.eu-west-2.amazonaws.com/dev"
+      # MERLOC_BROKER_URL: <YOUR_MERLOC_BROKER_URL>
+      AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+      NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=1000"
+
+plugins:
+  - serverless-esbuild
+
+package:
+  individually: false
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    exclude: ["aws-sdk"]
+    target: "node14"
+    define: { "require.resolve": undefined }
+    platform: "node"
+    concurrency: 10

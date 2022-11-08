@@ -1,0 +1,42 @@
+import type { AWS } from '@serverless/typescript';
+
+import hello from '@functions/hello';
+
+const serverlessConfiguration: AWS = {
+  service: 'hello-world-ts',
+  frameworkVersion: '3',
+  plugins: ['serverless-esbuild'],
+  provider: {
+    name: 'aws',
+    runtime: 'nodejs14.x',
+    timeout: 120,
+    region: 'eu-west-2',
+    layers: [
+      "arn:aws:lambda:eu-west-2:269863060030:layer:merloc-gatekeeper:15"
+    ],
+    environment: {
+      AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+      AWS_LAMBDA_EXEC_WRAPPER: '/opt/extensions/merloc-gatekeeper-ext/bootstrap',
+      MERLOC_BROKER_URL: 'wss://23umd9f64e.execute-api.eu-west-2.amazonaws.com/dev',
+      // MERLOC_BROKER_URL: '<YOUR_MERLOC_BROKER_URL>',
+      NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
+    },
+  },
+  // import the function via paths
+  functions: { hello },
+  package: { individually: true },
+  custom: {
+    esbuild: {
+      bundle: true,
+      minify: false,
+      sourcemap: true,
+      exclude: ['aws-sdk'],
+      target: 'node14',
+      define: { 'require.resolve': undefined },
+      platform: 'node',
+      concurrency: 10,
+    },
+  },
+};
+
+module.exports = serverlessConfiguration;
