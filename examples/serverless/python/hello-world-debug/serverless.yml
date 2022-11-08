@@ -1,7 +1,6 @@
-service: hello-world-merloc
+service: hello-world-debug
 
 frameworkVersion: '3'
-
 
 custom:
   stage: ${opt:stage, "dev"}
@@ -32,12 +31,12 @@ provider:
     MERLOC_BROKER_URL: <YOUR_MERLOC_BROKER_URL>
 
 functions:
-  hello:
+  helloDebug:
     handler: handler.hello
     events:
       - http:
           path: '/hello'
           method: get
-	
+
 plugins:
   - serverless-python-requirements
