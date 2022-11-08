@@ -1,0 +1,42 @@
+service: hello-world-merloc
+
+frameworkVersion: '3'
+
+
+custom:
+  stage: ${opt:stage, "dev"}
+  pythonRequirements:
+    dockerizePip: True
+    slim: true
+    noDeploy:
+      - boto3 # with botocore, it causes large zip file upload though they are already installed in lambda runtime for python.
+      - botocore
+      - docutils
+      - jmespath
+      - pip
+      - python-dateutil
+      - s3transfer
+      - setuptools
+      - six
+      - pytest
+
+provider:
+  name: aws
+  runtime: python3.9
+  layers:
+    - arn:aws:lambda:${self:provider.region}:269863060030:layer:merloc-gatekeeper:15
+  timeout: 300
+  region: ${opt:region, "us-west-2"}
+  environment:
+    AWS_LAMBDA_EXEC_WRAPPER: /opt/extensions/merloc-gatekeeper-ext/bootstrap
+    MERLOC_BROKER_CONNECTION_NAME: gokhan-sls-1
+    MERLOC_BROKER_URL: wss://merloc-broker.thundra.us
+    THUNDRA_APIKEY: b131711e-6c6f-4e92-bc01-52a1a945fb44
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - http:
+          path: '/hello'
+          method: get
