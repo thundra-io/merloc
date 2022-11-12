@@ -102,10 +102,10 @@ async function notifyPairedGateKeeperConnectionsOnClientDisconnect(
                             connectionName, gatekeeperConnectionId, undefined, GATEKEEPER_CONNECTION_TYPE);
                     try {
                         await postToConnection(event, brokerEnvelope, gatekeeperConnectionId);
-                        debug(`Notified paired gatekeeper connection (id=${clientConnectionId})` +
+                        debug(`Notified paired gatekeeper connection (id=${gatekeeperConnectionId})` +
                               `about disconnected client connection (name=${connectionName}, id=${clientConnectionId})`);
                     } catch (e) {
-                        error(`Couldn't notify paired gatekeeper connection (id=${clientConnectionId})` +
+                        error(`Couldn't notify paired gatekeeper connection (id=${gatekeeperConnectionId})` +
                               `about disconnected client connection (name=${connectionName}, id=${clientConnectionId})`,
                               e);
                     }
