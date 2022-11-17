@@ -16,7 +16,7 @@ Resources:
       Handler: HelloWorld::HelloWorld.Function::FunctionHandler
       Runtime: dotnet6
       Layers:
-        - !Sub "arn:aws:lambda:${AWS::Region}:269863060030:layer:merloc-gatekeeper:16"
+        - !Sub "arn:aws:lambda:${AWS::Region}:269863060030:layer:merloc-gatekeeper:26"
       Architectures:
         - x86_64
       MemorySize: 256

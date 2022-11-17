@@ -19,7 +19,7 @@ provider:
   timeout: 300
   region: us-west-2
   layers:
-    - arn:aws:lambda:${self:provider.region}:269863060030:layer:merloc-gatekeeper:16
+    - arn:aws:lambda:${self:provider.region}:269863060030:layer:merloc-gatekeeper:26
   environment:
     AWS_LAMBDA_EXEC_WRAPPER: /opt/extensions/merloc-gatekeeper-ext/bootstrap
     MERLOC_BROKER_URL: <YOUR_MERLOC_BROKER_URL>

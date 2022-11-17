@@ -23,7 +23,7 @@ provider:
   name: aws
   runtime: python3.9
   layers:
-    - arn:aws:lambda:${self:provider.region}:269863060030:layer:merloc-gatekeeper:16
+    - arn:aws:lambda:${self:provider.region}:269863060030:layer:merloc-gatekeeper:26
   timeout: 300
   region: ${opt:region, "us-west-2"}
   environment:
