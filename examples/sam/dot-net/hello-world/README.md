@@ -1,10 +1,10 @@
 # hello-world
 
-This is the example .Net6 project for Merloc.
+This is the example .Net6 project for MerLoc.
 
-## Merloc Setup
+## MerLoc Setup
 
-- "npm i -g merloc-cli" install merloc-local to your computer.
+- "npm i -g merloc-cli" install merloc-cli to your computer.
 
 - "MERLOC_BROKER_URL: <YOUR_MERLOC_BROKER_URL>" set it into template.yml.
 
@@ -25,13 +25,13 @@ sam build
 sam deploy --guided
 ```
 
-###### Start Merloc and Attach Debugger
+###### Start MerLoc and Attach Debugger
 
 - "merloc -d -b <YOUR_MERLOC_BROKER_URL> -i sam-local -r -w '**/*.cs'" run this commnad in terminal.
 
-- Trigger your function in order to start-up Merloc container.
+- Trigger your function in order to start-up MerLoc container.
 
-- After Merloc docker container is bootstrapped, start vscode debugger and attach the merloc container and clicking "Yes" for `Attaching to container requires .NET Core debugger in the container. Do you want to copy the debugger to the container?` to allow .NET debugger copying into Merloc container.
+- After MerLoc docker container is bootstrapped, start vscode debugger and attach the MerLoc container and clicking "Yes" for `Attaching to container requires .NET Core debugger in the container. Do you want to copy the debugger to the container?` to allow .NET debugger copying into MerLoc container.
 
 - Trigger your lambda function again and enjoy your debug session!
 

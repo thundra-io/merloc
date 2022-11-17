@@ -1,6 +1,6 @@
 # sam-app
 
-- "npm i -g merloc" install merloc-local to your computer.
+- "npm i -g merloc" install merloc-cli to your computer.
 
 - "MERLOC_BROKER_URL: <YOUR_MERLOC_BROKER_URL>" set it into template.yml.
 
