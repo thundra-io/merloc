@@ -29,7 +29,7 @@ functions:
     handler: handler.hello
     timeout: 120
     layers:
-      - "arn:aws:lambda:eu-west-2:269863060030:layer:merloc-gatekeeper:15"
+      - "arn:aws:lambda:${aws:region}:269863060030:layer:merloc-gatekeeper:26"
     environment:
       AWS_LAMBDA_EXEC_WRAPPER: /opt/extensions/merloc-gatekeeper-ext/bootstrap
-      MERLOC_BROKER_URL: wss://23umd9f64e.execute-api.eu-west-2.amazonaws.com/dev
+      MERLOC_BROKER_URL: <YOUR_MERLOC_BROKER_URL>

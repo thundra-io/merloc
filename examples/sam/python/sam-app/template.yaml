@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   sam-app
@@ -18,7 +18,7 @@ Resources:
       Handler: app.lambda_handler
       Runtime: python3.9
       Layers:
-        - !Sub "arn:aws:lambda:${AWS::Region}:269863060030:layer:merloc-gatekeeper:16"
+        - !Sub "arn:aws:lambda:${AWS::Region}:269863060030:layer:merloc-gatekeeper:26"
       Architectures:
         - x86_64
       Events:

@@ -20,7 +20,7 @@ Resources:
       Architectures:
         - x86_64
       Layers:
-        - arn:aws:lambda:eu-west-2:269863060030:layer:merloc-gatekeeper:15
+        - !Sub "arn:aws:lambda:${AWS::Region}:269863060030:layer:merloc-gatekeeper:26"
       Environment:
         Variables:
           AWS_LAMBDA_EXEC_WRAPPER: /opt/extensions/merloc-gatekeeper-ext/bootstrap

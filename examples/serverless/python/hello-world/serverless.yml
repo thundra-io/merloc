@@ -1,7 +1,6 @@
 service: hello-world-merloc
 
-frameworkVersion: '3'
-
+frameworkVersion: "3"
 
 custom:
   stage: ${opt:stage, "dev"}
@@ -36,8 +35,8 @@ functions:
     handler: handler.hello
     events:
       - http:
-          path: '/hello'
+          path: "/hello"
           method: get
-	
+
 plugins:
   - serverless-python-requirements
