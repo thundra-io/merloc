@@ -12,7 +12,10 @@
 <p align="center">
   <img width="12%" height="12%" src="https://4750167.fs1.hubspotusercontent-na1.net/hubfs/4750167/MerLoc/Frame%2011.png">
 </p>
-
+<div align="center">
+    <a href="https://www.youtube.com/watch?v=4LIILFk1qAw&ab_channel=Thundra"><strong>Launch Video »</strong></a>
+	    <a href="https://www.thundra.io/merloc?utm_source=readme&utm_medium=github&utm_campaign=merloc-announcement"><strong>Merloc Cloud »</strong></a>
+</div>
 <a name="readme-top"></a>
 
 **MerLoc** is a live AWS Lambda function development and debugging tool. 
