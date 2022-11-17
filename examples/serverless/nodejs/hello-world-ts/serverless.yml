@@ -26,30 +26,16 @@ provider:
 
 functions:
   hello:
-    # handler: handler.hello
-    handler: src/functions/hello/handler.main
+    handler: handler.hello
     timeout: 120
     layers:
       - "arn:aws:lambda:${aws:region}:269863060030:layer:merloc-gatekeeper:26"
     environment:
       AWS_LAMBDA_EXEC_WRAPPER: /opt/extensions/merloc-gatekeeper-ext/bootstrap
       MERLOC_BROKER_URL: <YOUR_MERLOC_BROKER_URL>
-      AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
-      NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=1000"
 
 plugins:
-  - serverless-esbuild
+  - serverless-plugin-typescript
 
 package:
-  individually: false
-
-custom:
-  esbuild:
-    bundle: true
-    minify: false
-    sourcemap: true
-    exclude: ["aws-sdk"]
-    target: "node14"
-    define: { "require.resolve": undefined }
-    platform: "node"
-    concurrency: 10
+  individually: true
