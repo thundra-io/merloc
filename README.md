@@ -1,11 +1,35 @@
 # MerLoc
 
-![license](https://img.shields.io/badge/License-Apache_2.0-blue.svg)
+
+<p align="center">
+    <a href="https://github.com/thundra-io/merloc" target="_blank"><img src="https://img.shields.io/github/license/thundra-io/merloc?style=for-the-badge" alt="MerLoc Licence" /></a>&nbsp;
+    <a href="https://discord.gg/bCtCmzP2ge" target="_blank"><img src="https://img.shields.io/discord/958745045308174416?style=for-the-badge&logo=discord&label=DISCORD" alt="MerLoc Discord Channel" /></a>&nbsp;
+    <a href="https://www.runforesight.com?utm_source=merloc-readme" target="_blank"><img src="https://img.shields.io/badge/Monitored%20by-Foresight-%239900F0?style=for-the-badge" alt="Foresight monitoring" /></a>&nbsp;
+    </a>&nbsp;
+    
+</p>
+
+<p align="center">
+  <img width="12%" height="12%" src="https://4750167.fs1.hubspotusercontent-na1.net/hubfs/4750167/MerLoc/Frame%2011.png">
+</p>
+
+<a name="readme-top"></a>
 
 **MerLoc** is a live AWS Lambda function development and debugging tool. 
 MerLoc allows you to run AWS Lambda functions on your local while they are still part of a flow in the AWS cloud remote.
 
-For example, let say that you have the following sample serverless architecture for your order application in your AWS account.
+It currently supports Java, Go, Python, Node.js & .NET runtimes & works with serverless framework & AWS SAM under the hood.
+
+
+
+<p align="center">
+  <img width="90%" height="90%" src="https://4750167.fs1.hubspotusercontent-na1.net/hubfs/4750167/MerLoc/logos.png">
+</p>
+
+
+## Use-case example
+
+Let's say that you have the following sample serverless architecture for your order application in your AWS account.
 ![Sample Architecture](./assets/sample-architecture.png)
 
 And you are developing the `order-notification-service`.
@@ -30,6 +54,24 @@ In the example shown above, when you run `order-notification-service` locally wi
 `order-request-service` and `order-processing-service` will run on real AWS Lambda environment, 
 and you will get real published message (by `order-processing-service`) from real `order-notification-topic` 
 on your local `order-notification-service` and run as a part of real flow in the cloud.
+
+
+## Self-Hosted & SaaS Available
+
+MerLoc is included with free package of Thundra APM and you can also follow this repository and host your own MerLoc broker. 
+
+
+<p align="center">
+  <a href="https://www.thundra.io/merloc?utm_source=github&utm_medium=repo&utm_campaign=merloc-announcement" target="_blank"><img width="40%" height="40%" src="https://4750167.fs1.hubspotusercontent-na1.net/hubfs/4750167/MerLoc/Frame%2017thundra-merloc.png"></a>
+</p>
+
+
+## How MerLoc works?
+
+<p align="center">
+  <img width="90%" height="90%" src="https://4750167.fs1.hubspotusercontent-na1.net/hubfs/4750167/MerLoc/Merloc_-Merloc-architecture.gif">
+</p>
+
 
 ## Architecture
 
@@ -81,11 +123,15 @@ After broker setup is complete, you also need to install following runtime compo
 
 2) **Local AWS Lambda runtime**: Manages and runs AWS Lambda functions on your local. You can install **MerLoc CLI** by following the instructions [here](https://github.com/thundra-io/merloc-cli)
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ## Configuration
 
 There are default configurations for the broker in the `merloc-broker/stack/.env` file.
 To change the broker configurations, you can update the values in the `.env` file here 
 and re-deploy the stack by running `deploy.sh`.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Custom Domain Name
 
@@ -97,12 +143,23 @@ After configuring those settings, your full custom domain name will be `${MERLOC
 
 So let's say that you have an AWS hosted zone with domain name `lambda.dev`. Then you set `MERLOC_DOMAIN_NAME` to `lambda.dev` and set `MERLOC_BROKER_WS_API_SUBDOMAIN_NAME` to `merloc`. So your full custom domain name will be `merloc.lambda.dev` and you can use `wss://merloc.lambda.dev` as your broker URL configuration.
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ## Contributing
 
 Everyone is very welcome to contribute to this repository.
 Feel free to [raise issues](https://github.com/thundra-io/merloc/issues)
 or to [submit Pull Requests](https://github.com/thundra-io/merloc/pulls).
 
+## Questions? Problems? Suggestions?
+
+To report a bug or request a feature, create a [GitHub Issue](https://github.com/thundra-io/merloc/issues). Please ensure someone else has not created an issue for the same topic.
+
+<p align="center">
+  <a href="https://discord.gg/bCtCmzP2ge" target="_blank"><img width="40%" height="40%" src="https://4750167.fs1.hubspotusercontent-na1.net/hubfs/4750167/Sidekick%20OS%20repo/joindiscord.png"></a>
+</p>
+
 ## License
 
 Licensed under [Apache License 2.0](LICENSE).
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
