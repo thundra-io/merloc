@@ -71,13 +71,15 @@ or from the AWS CloudFormation output, for ex:
 ## Runtime Setup
 
 After broker setup is complete, you also need to install following runtime specific (Java, Node.js, Python, ...) components (as shown in the [Architecture](#architecture) section):
-- **GateKeeper**: Allows AWS Lambda functions to communicate with your local runtime through broker
-- **Local AWS Lambda runtime**: Manages and runs WS Lambda functions on your local
 
-While broker is common for all runtimes, these components need to be installed per supported runtime.
+1) **GateKeeper**: Allows AWS Lambda functions to communicate with your local runtime through broker. You can add **MerLoc GateKeeper** as AWS Lambda extension to your AWS Lambda function by following the instructions [here](https://github.com/thundra-io/merloc-gatekeeper-aws-lambda-extension).
 
-You can check the following links for runtime specific setup for supported runtimes:
-- [Java Runtime Support](https://github.com/thundra-io/merloc-java)
+> **Warning**
+> MerLoc **GateKeeper** setup requires different configurations for Go runtime. 
+> You can check [here](https://github.com/thundra-io/merloc-gatekeeper-aws-lambda-extension#layer-setup-for-go-runtime)
+> and [here](https://github.com/thundra-io/merloc-gatekeeper-aws-lambda-extension#configure-for-go-runtime) for the details.
+
+2) **Local AWS Lambda runtime**: Manages and runs AWS Lambda functions on your local. You can install **MerLoc CLI** by following the instructions [here](https://github.com/thundra-io/merloc-cli)
 
 ## Configuration
 
