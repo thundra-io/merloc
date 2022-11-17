@@ -6,7 +6,7 @@
 
 - sam deploy --guided
 
-- "merloc -d -b <YOUR_MERLOC_BROKER_URL> -i sam-local -r -w '**/*.py'" run this commnad in terminal.
+- `merloc -d -b <YOUR_MERLOC_BROKER_URL> -i sam-local -r -w '**/*.py'` run this commnad in terminal.
 
 - Trigger lambda from console by clicking Test.
 

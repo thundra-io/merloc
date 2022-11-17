@@ -6,4 +6,4 @@
 
 - sam deploy --guided
 
-- "merloc -b <YOUR_BROKER_URL> -i sam-local -r -w '**/*.py'" run this commnad in terminal.
+- `merloc -b <YOUR_BROKER_URL> -i sam-local -r -w '**/*.py'` run this commnad in terminal.

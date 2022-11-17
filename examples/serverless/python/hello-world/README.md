@@ -4,7 +4,7 @@
 
 - Deploy on aws with "sls deploy"
 
-- merloc -b <YOUR_MERLOC_BROKER_URK> -i serverless-local -r -w '**/*.py'
+- Run `merloc -b <YOUR_MERLOC_BROKER_URK> -i serverless-local -r -w '**/*.py'` command from terminal.
 
 - Trigger your lambda function and check terminal outputs.
 

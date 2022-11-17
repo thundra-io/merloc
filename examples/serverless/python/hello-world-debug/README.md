@@ -10,7 +10,7 @@
 
 - Deploy on aws with "sls deploy"
 
-- merloc -d -b <YOUR_MERLOC_BROKER_URK> -i serverless-local -r -w '**/*.py'
+- Run `merloc -d -b <YOUR_MERLOC_BROKER_URK> -i serverless-local -r -w '**/*.py'` at terminal.
 
 - After trigger your lambda function, get local Docker Port from terminal and set it into .vscode/launch.json.
 
