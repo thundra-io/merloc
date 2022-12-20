@@ -109,8 +109,9 @@ async function forwardToClient(event: APIGatewayEvent, envelop: BrokerEnvelope,
         clientConnectionId = await findAssociatedClientConnectionId(connectionName);
         if (!clientConnectionId) {
             debug(`No client connection could be found with name ${connectionName}`);
-            debug(`Checking default client connection ...`);
-            clientConnectionId = await findAssociatedClientConnectionId(getDefaultConnectionName(connectionName));
+            const defaultConnectionName: string = getDefaultConnectionName(connectionName);
+            debug(`Checking default client connection with name ${defaultConnectionName} ...`);
+            clientConnectionId = await findAssociatedClientConnectionId(defaultConnectionName);
             if (!clientConnectionId) {
                 debug(`No default client connection could be found`);
                 const brokerEnvelope: BrokerEnvelope =
