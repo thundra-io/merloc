@@ -143,6 +143,7 @@ export function buildBrokerEnvelope(type: string, connectionName: string, target
     return {
         id: generateId(),
         connectionName,
+        time: Date.now(),
         responseOf,
         sourceConnectionType: BROKER_CONNECTION_TYPE,
         targetConnectionId,
