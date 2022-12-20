@@ -88,7 +88,7 @@ export function getDefaultConnectionName(connectionName: string): string {
     if (connectionAPIKey) {
         // If connection has API key ("<connection-name>##<api-key>"),
         // its default connection name is based on its API key ("default##<api-key>")
-        return `${DEFAULT_CONNECTION_NAME}${CONNECTION_TYPE_SEPARATOR}${connectionAPIKey}`;
+        return `${DEFAULT_CONNECTION_NAME}${CONNECTION_API_KEY_SEPARATOR}${connectionAPIKey}`;
     }
     return DEFAULT_CONNECTION_NAME;
 }
