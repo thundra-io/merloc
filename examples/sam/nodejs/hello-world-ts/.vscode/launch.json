@@ -1,0 +1,25 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "AWS SAM TS Example Debug",
+            "type": "node",
+            "request": "attach",
+            "address": "localhost",
+            "port": 10001,
+            "localRoot": "${workspaceFolder}/.aws-sam/build/HelloWorldFunction",
+            "continueOnAttach": true,
+            "remoteRoot": "/var/task/",
+            "sourceMaps": true,
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ]
+        }
+    ]
+}

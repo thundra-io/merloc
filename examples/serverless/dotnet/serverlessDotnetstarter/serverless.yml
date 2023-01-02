@@ -1,0 +1,39 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: serverlessDotnetstarter
+
+provider:
+  name: aws
+  runtime: dotnet6
+  timeout: 300
+  region: us-west-2
+  layers:
+    - arn:aws:lambda:${self:provider.region}:269863060030:layer:merloc-gatekeeper:26
+  environment:
+    AWS_LAMBDA_EXEC_WRAPPER: /opt/extensions/merloc-gatekeeper-ext/bootstrap
+    MERLOC_BROKER_URL: <YOUR_MERLOC_BROKER_URL>
+
+package:
+  individually: true
+
+functions:
+  hello:
+    handler: AwsDotnetCsharp::AwsDotnetCsharp.Handler::HelloWorld
+    package:
+      artifact: bin/release/net6.0/hello.zip
+
+    events:
+      - http:
+          path: hello
+          method: get
